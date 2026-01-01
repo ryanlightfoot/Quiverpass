@@ -3,6 +3,7 @@ import './App.css'
 import Homepage from './page/homepage.jsx'
 import Login from './page/login.jsx'
 import Signup from './page/signup.jsx'
+import Surfboards from './page/surfboards.jsx'
 import QuiverPassLogo from './assets/QuiverPassLogo.png'
 
 function App() {
@@ -32,12 +33,22 @@ function App() {
     setCurrentPage('login');
   };
 
+  const handleHeaderClick = () => {
+    setCurrentPage('surfboards');
+  };
+
   return (
     <>
       {/* HEADER: Quiverpass with logo */}
       <header className="app-header">
-        <img src={QuiverPassLogo} alt="Quiverpass Logo" className="header-logo" />
-        <h1 className="header-title">Quiverpass</h1>
+        <div className="header-spacer"></div>
+        <button className="header-link" onClick={handleHeaderClick}>
+          <img src={QuiverPassLogo} alt="Quiverpass Logo" className="header-logo" />
+          <h1 className="header-title">Quiverpass</h1>
+        </button>
+        <button className="header-login-btn" onClick={handleBackToHome}>
+          Login/Register
+        </button>
       </header>
       
       {/* Main content */}
@@ -49,12 +60,14 @@ function App() {
           onBack={handleBackToHome}
           onSignupClick={handleSignupClick}
         />
-      ) : (
+      ) : currentPage === 'signup' ? (
         <Signup 
           userType={userType} 
           onBack={handleBackToLogin}
           onSignupSuccess={handleSignupSuccess}
         />
+      ) : (
+        <Surfboards />
       )}
     </>
   )
