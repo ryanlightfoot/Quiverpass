@@ -2,7 +2,7 @@ import React from 'react';
 import { Waves, Store } from 'lucide-react';
 import '../App.css';
 
-const Homepage = ({ onLoginClick }) => {
+const Homepage = ({ onLoginClick, onSignupClick }) => {
   return (
     <div>
       {/* MAIN: Buttons centered in the middle of the screen */}
@@ -35,6 +35,19 @@ const Homepage = ({ onLoginClick }) => {
             <Store size={18} />
             <span>Login as Surf School</span>
           </button>
+
+          {/* Sign Up Link */}
+          <div className="homepage-signup">
+            <p className="homepage-signup-text">
+              Don't have an account?{' '}
+              <button 
+                className="homepage-signup-link"
+                onClick={() => onSignupClick && onSignupClick('surfer')}
+              >
+                Sign up here
+              </button>
+            </p>
+          </div>
 
         </div>
 

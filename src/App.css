@@ -255,6 +255,43 @@ html, body, #root {
   box-shadow: 0 4px 12px rgba(201, 164, 112, 0.2);
 }
 
+/* --- 6.5. HOMEPAGE SIGNUP LINK --- */
+.homepage-signup {
+  margin-top: 8px;
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.homepage-signup-text {
+  color: #6B7280;
+  font-size: 0.9rem;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.homepage-signup-link {
+  background: none;
+  border: none;
+  color: #165B68;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.2s ease;
+}
+
+.homepage-signup-link:hover {
+  color: #114852;
+  text-decoration-thickness: 2px;
+}
+
+.homepage-signup-link:active {
+  color: #0d3a42;
+}
+
 /* --- 7. ANIMATIONS --- */
 @keyframes fadeInDown {
   from {
@@ -491,6 +528,14 @@ html, body, #root {
   color: #165B68;
 }
 
+.form-error {
+  display: block;
+  color: #DC2626;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
 .form-options {
   display: flex;
   justify-content: flex-end;
@@ -603,6 +648,129 @@ html, body, #root {
 .signup-link:hover {
   color: #114852;
   text-decoration: underline;
+}
+
+/* User Type Selector */
+.user-type-selector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 4px;
+  background-color: #F3F4F6;
+  border-radius: 12px;
+  position: relative;
+}
+
+.user-type-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #6B7280;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: relative;
+  z-index: 1;
+}
+
+.user-type-btn:hover {
+  color: #165B68;
+}
+
+.user-type-btn.active {
+  background: #FFFFFF;
+  color: #165B68;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-type-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.user-type-btn.active svg {
+  transform: scale(1.1);
+}
+
+.user-type-btn:first-child.active {
+  color: #165B68;
+}
+
+.user-type-btn:last-child.active {
+  color: #C9A470;
+}
+
+/* Signup Success Message */
+.signup-success {
+  text-align: center;
+  padding: 20px 0;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.success-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.5s ease-out 0.2s both;
+}
+
+.success-icon.surfer-icon {
+  background: linear-gradient(135deg, #165B68 0%, #114852 100%);
+  box-shadow: 0 8px 20px rgba(22, 91, 104, 0.3);
+}
+
+.success-icon.school-icon {
+  background: linear-gradient(135deg, #C9A470 0%, #B8945F 100%);
+  box-shadow: 0 8px 20px rgba(201, 164, 112, 0.3);
+}
+
+.success-title {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px 0;
+}
+
+.success-message {
+  color: #6B7280;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.success-message strong {
+  color: #165B68;
+  font-weight: 600;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Login Page Responsive */

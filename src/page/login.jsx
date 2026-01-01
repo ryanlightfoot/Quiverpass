@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Waves, Store, ArrowLeft, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import '../App.css';
 
-const Login = ({ userType = 'surfer', onBack }) => {
+const Login = ({ userType = 'surfer', onBack, onSignupClick }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -122,7 +122,16 @@ const Login = ({ userType = 'surfer', onBack }) => {
           <div className="login-footer">
             <p className="signup-text">
               Don't have an account?{' '}
-              <a href="#" className="signup-link">
+              <a 
+                href="#" 
+                className="signup-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onSignupClick) {
+                    onSignupClick(userType);
+                  }
+                }}
+              >
                 Sign up here
               </a>
             </p>

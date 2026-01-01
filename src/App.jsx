@@ -2,19 +2,34 @@ import React, { useState } from 'react'
 import './App.css'
 import Homepage from './page/homepage.jsx'
 import Login from './page/login.jsx'
+import Signup from './page/signup.jsx'
 import QuiverPassLogo from './assets/QuiverPassLogo.png'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('homepage');
-  const [loginType, setLoginType] = useState('surfer');
+  const [userType, setUserType] = useState('surfer');
 
   const handleLoginClick = (type) => {
-    setLoginType(type);
+    setUserType(type);
     setCurrentPage('login');
+  };
+
+  const handleSignupClick = (type) => {
+    setUserType(type);
+    setCurrentPage('signup');
   };
 
   const handleBackToHome = () => {
     setCurrentPage('homepage');
+  };
+
+  const handleBackToLogin = () => {
+    setCurrentPage('login');
+  };
+
+  const handleSignupSuccess = () => {
+    // After successful signup, redirect to login
+    setCurrentPage('login');
   };
 
   return (
@@ -27,9 +42,19 @@ function App() {
       
       {/* Main content */}
       {currentPage === 'homepage' ? (
-        <Homepage onLoginClick={handleLoginClick} />
+        <Homepage onLoginClick={handleLoginClick} onSignupClick={handleSignupClick} />
+      ) : currentPage === 'login' ? (
+        <Login 
+          userType={userType} 
+          onBack={handleBackToHome}
+          onSignupClick={handleSignupClick}
+        />
       ) : (
-        <Login userType={loginType} onBack={handleBackToHome} />
+        <Signup 
+          userType={userType} 
+          onBack={handleBackToLogin}
+          onSignupSuccess={handleSignupSuccess}
+        />
       )}
     </>
   )
