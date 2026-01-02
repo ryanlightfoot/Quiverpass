@@ -5,15 +5,20 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../App.css';
 
-// Fix for default marker icons in React
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+// Fix for default marker icons in React - suppress errors if icons fail to load
+try {
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  });
+} catch (error) {
+  // Silently handle icon loading errors - custom icons will be used instead
+  console.warn('Leaflet default icons could not be loaded, using custom icons');
+}
 
-const Surfboards = () => {
+const Surfboards = ({ onRentClick }) => {
   const [selectedArea, setSelectedArea] = useState(null);
   const [filters, setFilters] = useState({
     city: '',
@@ -111,6 +116,25 @@ const Surfboards = () => {
   const centerLat = surfSchools.reduce((sum, s) => sum + s.lat, 0) / surfSchools.length;
   const centerLng = surfSchools.reduce((sum, s) => sum + s.lng, 0) / surfSchools.length;
 
+  // Calculate bounds to restrict map navigation
+  const bounds = useMemo(() => {
+    const lats = surfSchools.map(s => s.lat);
+    const lngs = surfSchools.map(s => s.lng);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    
+    // Add padding to bounds
+    const latPadding = (maxLat - minLat) * 0.3;
+    const lngPadding = (maxLng - minLng) * 0.3;
+    
+    return [
+      [minLat - latPadding, minLng - lngPadding], // Southwest corner
+      [maxLat + latPadding, maxLng + lngPadding]  // Northeast corner
+    ];
+  }, []);
+
   // Create custom icon for markers
   const createCustomIcon = (isActive) => {
     return L.divIcon({
@@ -161,11 +185,15 @@ const Surfboards = () => {
             zoom={2}
             style={{ height: '100%', width: '100%', minHeight: '500px' }}
             scrollWheelZoom={true}
+            maxBounds={bounds}
+            maxBoundsViscosity={1.0}
+            worldCopyJump={false}
             whenCreated={(mapInstance) => {
-              // Force map to invalidate size after creation
+              // Force map to invalidate size after creation and set bounds
               setTimeout(() => {
                 mapInstance.invalidateSize();
                 mapInstance.setView([centerLat, centerLng], 2);
+                mapInstance.setMaxBounds(bounds);
               }, 200);
             }}
           >
@@ -174,6 +202,7 @@ const Surfboards = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               maxZoom={19}
               minZoom={2}
+              noWrap={true}
             />
           {surfSchools.map(school => {
             const isActive = selectedArea?.id === school.id;
@@ -391,7 +420,12 @@ const Surfboards = () => {
                     <span className="price-amount">${board.price}</span>
                     <span className="price-period">/day</span>
                   </div>
-                  <button className="rent-btn">Rent Now</button>
+                  <button 
+                    className="rent-btn"
+                    onClick={() => onRentClick && onRentClick(board)}
+                  >
+                    Rent Now
+                  </button>
                 </div>
               </div>
             ))

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Waves, Store } from 'lucide-react';
+import QuiverPassLogo from '../assets/QuiverPassLogo.png';
 import '../App.css';
 
 const Homepage = ({ onLoginClick, onSignupClick }) => {
@@ -7,6 +8,18 @@ const Homepage = ({ onLoginClick, onSignupClick }) => {
     <div>
       {/* MAIN: Buttons centered in the middle of the screen */}
       <main className="main-content">
+        
+        {/* Logo */}
+        <div className="homepage-logo-container">
+          <img 
+            src={QuiverPassLogo} 
+            alt="Quiverpass Logo" 
+            className="homepage-logo"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        </div>
         
         <div className="button-group">
           
@@ -52,7 +65,6 @@ const Homepage = ({ onLoginClick, onSignupClick }) => {
         </div>
 
       </main>
-
     </div>
   );
 };

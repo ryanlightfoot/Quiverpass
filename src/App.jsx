@@ -4,11 +4,13 @@ import Homepage from './page/homepage.jsx'
 import Login from './page/login.jsx'
 import Signup from './page/signup.jsx'
 import Surfboards from './page/surfboards.jsx'
+import Rent from './page/rent.jsx'
 import QuiverPassLogo from './assets/QuiverPassLogo.png'
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('homepage');
+  const [currentPage, setCurrentPage] = useState('surfpage');
   const [userType, setUserType] = useState('surfer');
+  const [selectedBoard, setSelectedBoard] = useState(null);
 
   const handleLoginClick = (type) => {
     setUserType(type);
@@ -37,13 +39,29 @@ function App() {
     setCurrentPage('surfboards');
   };
 
+  const handleRentClick = (board) => {
+    setSelectedBoard(board);
+    setCurrentPage('rent');
+  };
+
+  const handleBackToSurfboards = () => {
+    setCurrentPage('surfboards');
+    setSelectedBoard(null);
+  };
+
   return (
     <>
       {/* HEADER: Quiverpass with logo */}
       <header className="app-header">
-        <div className="header-spacer"></div>
         <button className="header-link" onClick={handleHeaderClick}>
-          <img src={QuiverPassLogo} alt="Quiverpass Logo" className="header-logo" />
+          <img 
+            src={QuiverPassLogo} 
+            alt="Quiverpass Logo" 
+            className="header-logo"
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
           <h1 className="header-title">Quiverpass</h1>
         </button>
         <button className="header-login-btn" onClick={handleBackToHome}>
@@ -66,8 +84,13 @@ function App() {
           onBack={handleBackToLogin}
           onSignupSuccess={handleSignupSuccess}
         />
+      ) : currentPage === 'rent' ? (
+        <Rent 
+          board={selectedBoard}
+          onBack={handleBackToSurfboards}
+        />
       ) : (
-        <Surfboards />
+        <Surfboards onRentClick={handleRentClick} />
       )}
     </>
   )
