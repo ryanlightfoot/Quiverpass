@@ -187,6 +187,38 @@ img {
   text-shadow: 0 1px 4px rgba(22, 91, 104, 0.1);
 }
 
+/* Header Navigation */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-nav-btn {
+  padding: 8px 16px;
+  background: transparent;
+  color: #165B68;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  outline: none !important;
+}
+
+.header-nav-btn:hover {
+  background: rgba(22, 91, 104, 0.1);
+  border-color: rgba(22, 91, 104, 0.2);
+}
+
+.header-nav-btn:active {
+  transform: translateY(1px);
+}
+
 /* --- 4. HOMEPAGE LOGO --- */
 .homepage-logo-container {
   display: flex;
@@ -1798,6 +1830,587 @@ img {
 
   .calendar-day {
     font-size: 0.8rem;
+  }
+}
+
+/* --- 13. SURFSCHOOL PAGE STYLES --- */
+.surfschool-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.surfschool-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  background-color: #F4F0E6;
+}
+
+.surfschool-card {
+  width: 100%;
+  max-width: 1200px;
+  background: #FFFFFF;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(22, 91, 104, 0.15);
+  position: relative;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.surfschool-header {
+  margin-bottom: 32px;
+}
+
+.surfschool-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.surfschool-title {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 8px 0;
+}
+
+.surfschool-subtitle {
+  color: #6B7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.surfschool-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(22, 91, 104, 0.05) 0%, rgba(201, 164, 112, 0.05) 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(22, 91, 104, 0.1);
+}
+
+.stat-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #165B68;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.surfschool-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-status-btn {
+  padding: 10px 20px;
+  background: #F3F4F6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  color: #6B7280;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.filter-status-btn:hover {
+  background: #E5E7EB;
+  color: #165B68;
+}
+
+.filter-status-btn.active {
+  background: linear-gradient(135deg, #165B68 0%, #114852 100%);
+  color: #F4F0E6;
+  border-color: #165B68;
+}
+
+.rentals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rental-card {
+  background: #FFFFFF;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.rental-card:hover {
+  border-color: #165B68;
+  box-shadow: 0 4px 12px rgba(22, 91, 104, 0.1);
+}
+
+.rental-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #F3F4F6;
+}
+
+.rental-board-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex: 1;
+}
+
+.rental-board-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #165B68 0%, #114852 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rental-board-name {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.rental-board-specs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6B7280;
+  font-size: 0.875rem;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.upcoming {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+  border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.completed {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6B7280;
+  border: 2px solid rgba(107, 114, 128, 0.3);
+}
+
+.rental-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.rental-detail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.rental-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rental-detail-item svg {
+  color: #165B68;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rental-detail-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.rental-detail-value {
+  display: block;
+  font-size: 0.95rem;
+  color: #165B68;
+  font-weight: 600;
+}
+
+.rental-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 2px solid #F3F4F6;
+}
+
+.rental-timing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6B7280;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.rental-timing svg {
+  color: #165B68;
+}
+
+.rental-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.rental-price-label {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.rental-price-value {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #165B68;
+}
+
+.rental-contact {
+  padding-top: 16px;
+  border-top: 1px solid #F3F4F6;
+  margin-top: 16px;
+}
+
+.contact-email {
+  color: #165B68;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contact-email:hover {
+  color: #114852;
+  text-decoration: underline;
+}
+
+.no-rentals {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: #9CA3AF;
+}
+
+.no-rentals h3 {
+  font-family: 'Oswald', sans-serif;
+  color: #6B7280;
+  font-size: 1.5rem;
+  margin: 16px 0 8px 0;
+  text-transform: uppercase;
+}
+
+.no-rentals p {
+  color: #9CA3AF;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Calendar Section */
+.surfschool-calendar-section {
+  margin-bottom: 40px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid #F3F4F6;
+}
+
+.calendar-section-title {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 20px 0;
+}
+
+.school-calendar-wrapper {
+  background: #F9FAFB;
+  border-radius: 16px;
+  padding: 24px;
+  border: 2px solid #E5E7EB;
+}
+
+.school-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.school-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.school-calendar-day {
+  aspect-ratio: 1;
+  background: #FFFFFF;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 8px 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 80px;
+  transition: all 0.2s ease;
+}
+
+.school-calendar-day:hover {
+  border-color: #165B68;
+  background: #F9FAFB;
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.school-calendar-day.today {
+  border-color: #165B68;
+  border-width: 3px;
+  background: rgba(22, 91, 104, 0.05);
+}
+
+.school-calendar-day.today .calendar-day-number {
+  font-weight: 700;
+  color: #165B68;
+}
+
+.school-calendar-day.has-rentals {
+  border-color: rgba(22, 91, 104, 0.3);
+}
+
+.school-calendar-day.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.calendar-day-number {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #165B68;
+  margin-bottom: 4px;
+}
+
+.calendar-rental-indicators {
+  display: flex;
+  width: 100%;
+  gap: 2px;
+  margin-top: auto;
+  align-items: flex-end;
+}
+
+.rental-indicator {
+  height: 6px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.rental-indicator.active {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.rental-indicator.upcoming {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.rental-indicator.completed {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.school-calendar-day:hover .rental-indicator {
+  height: 8px;
+}
+
+.calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-top: 16px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+.legend-color {
+  width: 20px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.legend-color.active {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.legend-color.upcoming {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.legend-color.completed {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.calendar-tooltip {
+  position: absolute;
+  background: #FFFFFF;
+  border: 2px solid #165B68;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(22, 91, 104, 0.2);
+  z-index: 1000;
+  pointer-events: none;
+  min-width: 200px;
+  margin-top: 8px;
+}
+
+.tooltip-board-name {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.tooltip-renter {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.tooltip-dates {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+}
+
+/* Surfschool Page Responsive */
+@media (max-width: 768px) {
+  .surfschool-header-top {
+    flex-direction: column;
+  }
+
+  .surfschool-stats {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .rental-detail-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .rental-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-nav {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-nav-btn {
+    font-size: 0.75rem;
+    padding: 6px 12px;
+  }
+
+  .school-calendar-grid {
+    gap: 2px;
+  }
+
+  .school-calendar-day {
+    min-height: 60px;
+    padding: 4px 2px;
+  }
+
+  .calendar-day-number {
+    font-size: 0.8rem;
+  }
+
+  .rental-indicator {
+    height: 4px;
+  }
+
+  .calendar-legend {
+    gap: 16px;
   }
 }
 

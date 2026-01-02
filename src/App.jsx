@@ -5,6 +5,7 @@ import Login from './page/login.jsx'
 import Signup from './page/signup.jsx'
 import Surfboards from './page/surfboards.jsx'
 import Rent from './page/rent.jsx'
+import Surfschool from './page/surfschool.jsx'
 import QuiverPassLogo from './assets/QuiverPassLogo.png'
 
 function App() {
@@ -64,9 +65,23 @@ function App() {
           />
           <h1 className="header-title">Quiverpass</h1>
         </button>
-        <button className="header-login-btn" onClick={handleBackToHome}>
-          Login/Register
-        </button>
+        <div className="header-nav">
+          <button 
+            className="header-nav-btn" 
+            onClick={() => setCurrentPage('surfboards')}
+          >
+            Browse Boards
+          </button>
+          <button 
+            className="header-nav-btn" 
+            onClick={() => setCurrentPage('surfschool')}
+          >
+            Surf School
+          </button>
+          <button className="header-login-btn" onClick={handleBackToHome}>
+            Login/Register
+          </button>
+        </div>
       </header>
       
       {/* Main content */}
@@ -89,6 +104,8 @@ function App() {
           board={selectedBoard}
           onBack={handleBackToSurfboards}
         />
+      ) : currentPage === 'surfschool' ? (
+        <Surfschool />
       ) : (
         <Surfboards onRentClick={handleRentClick} />
       )}
