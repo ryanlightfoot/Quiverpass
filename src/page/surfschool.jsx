@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Waves, Calendar, MapPin, User, Clock, CheckCircle, XCircle } from 'lucide-react';
 import '../App.css';
 
@@ -93,10 +93,16 @@ const Surfschool = () => {
 
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, upcoming, completed
 
+  // Sort rentals: active first, then upcoming, then completed
+  const statusOrder = { active: 1, upcoming: 2, completed: 3 };
+  const sortedRentals = [...rentals].sort((a, b) => {
+    return (statusOrder[a.status] || 999) - (statusOrder[b.status] || 999);
+  });
+
   // Filter rentals based on status
   const filteredRentals = filterStatus === 'all' 
-    ? rentals 
-    : rentals.filter(rental => rental.status === filterStatus);
+    ? sortedRentals 
+    : sortedRentals.filter(rental => rental.status === filterStatus);
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -144,7 +150,10 @@ const Surfschool = () => {
 
   // Calendar functionality - initialize to January 2024 to show the hardcoded rentals
   const [selectedMonth, setSelectedMonth] = useState(new Date(2024, 0, 1));
-  const [hoveredRental, setHoveredRental] = useState(null);
+  const [hoveredRentals, setHoveredRentals] = useState(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+  const tooltipRef = useRef(null);
+  const dayRefs = useRef({});
 
   // Get days in month
   const getDaysInMonth = (date) => {
@@ -179,6 +188,79 @@ const Surfschool = () => {
   const changeMonth = (direction) => {
     setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + direction, 1));
   };
+
+  // Calculate tooltip position based on calendar day block
+  const updateTooltipPosition = useCallback((dayElement, mouseX, mouseY) => {
+    if (!dayElement) return;
+
+    const rect = dayElement.getBoundingClientRect();
+    const offset = 15;
+    const tooltipWidth = 300;
+    const tooltipHeight = 200;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Calculate base position (center-right of the day block)
+    let baseX = rect.right + offset;
+    let baseY = rect.top + (rect.height / 2);
+
+    // Small interactive offset based on mouse position within block
+    const mouseOffsetX = (mouseX - (rect.left + rect.width / 2)) * 0.3; // 30% of mouse offset
+    const mouseOffsetY = (mouseY - (rect.top + rect.height / 2)) * 0.3;
+    
+    let x = baseX + mouseOffsetX;
+    let y = baseY - (tooltipHeight / 2) + mouseOffsetY;
+
+    // Use actual dimensions if tooltip is rendered
+    let actualWidth = tooltipWidth;
+    let actualHeight = tooltipHeight;
+    if (tooltipRef.current) {
+      actualWidth = tooltipRef.current.offsetWidth || tooltipWidth;
+      actualHeight = tooltipRef.current.offsetHeight || tooltipHeight;
+    }
+
+    // Check right edge - flip to left side
+    if (x + actualWidth > viewportWidth) {
+      x = rect.left - actualWidth - offset + mouseOffsetX;
+    }
+
+    // Check left edge
+    if (x < 0) {
+      x = offset;
+    }
+
+    // Check bottom edge
+    if (y + actualHeight > viewportHeight) {
+      y = viewportHeight - actualHeight - offset;
+    }
+
+    // Check top edge
+    if (y < 0) {
+      y = offset;
+    }
+
+    setTooltipPosition({ 
+      x, 
+      y, 
+      offsetX: mouseOffsetX, 
+      offsetY: mouseOffsetY 
+    });
+  }, []);
+
+  // Recalculate position when tooltip first appears or window resizes
+  useEffect(() => {
+    if (hoveredRentals && tooltipRef.current) {
+      const dayElement = dayRefs.current[hoveredRentals.day];
+      if (dayElement) {
+        requestAnimationFrame(() => {
+          const rect = dayElement.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+          updateTooltipPosition(dayElement, centerX, centerY);
+        });
+      }
+    }
+  }, [hoveredRentals, updateTooltipPosition]);
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -225,33 +307,6 @@ const Surfschool = () => {
               </div>
             </div>
 
-            {/* Filter Buttons */}
-            <div className="surfschool-filters">
-              <button
-                className={`filter-status-btn ${filterStatus === 'all' ? 'active' : ''}`}
-                onClick={() => setFilterStatus('all')}
-              >
-                All Rentals
-              </button>
-              <button
-                className={`filter-status-btn ${filterStatus === 'active' ? 'active' : ''}`}
-                onClick={() => setFilterStatus('active')}
-              >
-                Active ({activeCount})
-              </button>
-              <button
-                className={`filter-status-btn ${filterStatus === 'upcoming' ? 'active' : ''}`}
-                onClick={() => setFilterStatus('upcoming')}
-              >
-                Upcoming ({upcomingCount})
-              </button>
-              <button
-                className={`filter-status-btn ${filterStatus === 'completed' ? 'active' : ''}`}
-                onClick={() => setFilterStatus('completed')}
-              >
-                Completed ({completedCount})
-              </button>
-            </div>
           </div>
 
           {/* Calendar View */}
@@ -300,9 +355,26 @@ const Surfschool = () => {
                   return (
                     <div
                       key={day}
+                      ref={(el) => {
+                        if (el) dayRefs.current[day] = el;
+                      }}
                       className={`school-calendar-day ${isToday ? 'today' : ''} ${dateRentals.length > 0 ? 'has-rentals' : ''}`}
-                      onMouseEnter={() => dateRentals.length > 0 && setHoveredRental({ rental: dateRentals[0], day })}
-                      onMouseLeave={() => setHoveredRental(null)}
+                      onMouseEnter={(e) => {
+                        if (dateRentals.length > 0) {
+                          const dayElement = dayRefs.current[day];
+                          updateTooltipPosition(dayElement, e.clientX, e.clientY);
+                          setHoveredRentals({ rentals: dateRentals, day });
+                        }
+                      }}
+                      onMouseMove={(e) => {
+                        if (dateRentals.length > 0) {
+                          const dayElement = dayRefs.current[day];
+                          requestAnimationFrame(() => {
+                            updateTooltipPosition(dayElement, e.clientX, e.clientY);
+                          });
+                        }
+                      }}
+                      onMouseLeave={() => setHoveredRentals(null)}
                     >
                       <span className="calendar-day-number">{day}</span>
                       {dateRentals.length > 0 && (
@@ -342,15 +414,68 @@ const Surfschool = () => {
               </div>
 
               {/* Hover Tooltip */}
-              {hoveredRental && hoveredRental.rental && (
-                <div className="calendar-tooltip">
-                  <div className="tooltip-board-name">{hoveredRental.rental.boardName}</div>
-                  <div className="tooltip-renter">{hoveredRental.rental.renterName}</div>
-                  <div className="tooltip-dates">
-                    {formatDate(hoveredRental.rental.startDate)} - {formatDate(hoveredRental.rental.endDate)}
+              {hoveredRentals && hoveredRentals.rentals && hoveredRentals.rentals.length > 0 && (
+                <div 
+                  ref={tooltipRef}
+                  className="calendar-tooltip"
+                  style={{
+                    left: `${tooltipPosition.x}px`,
+                    top: `${tooltipPosition.y}px`,
+                  }}
+                >
+                  <div className="tooltip-header">
+                    <div className="tooltip-day">Day {hoveredRentals.day}</div>
+                    <div className="tooltip-count">{hoveredRentals.rentals.length} {hoveredRentals.rentals.length === 1 ? 'Rental' : 'Rentals'}</div>
+                  </div>
+                  <div className="tooltip-rentals-list">
+                    {hoveredRentals.rentals.map((rental, idx) => (
+                      <div key={rental.id} className="tooltip-rental-item">
+                        <div className="tooltip-rental-header">
+                          <div className="tooltip-board-name">{rental.boardName}</div>
+                          <div className={`tooltip-status-badge ${rental.status}`}>
+                            {rental.status}
+                          </div>
+                        </div>
+                        <div className="tooltip-renter">{rental.renterName}</div>
+                        <div className="tooltip-dates">
+                          {formatDate(rental.startDate)} - {formatDate(rental.endDate)}
+                        </div>
+                        {idx < hoveredRentals.rentals.length - 1 && <div className="tooltip-divider"></div>}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Filter Buttons - After Calendar */}
+          <div className="surfschool-filters-section">
+            <div className="surfschool-filters">
+              <button
+                className={`filter-status-btn ${filterStatus === 'all' ? 'active' : ''}`}
+                onClick={() => setFilterStatus('all')}
+              >
+                All Rentals
+              </button>
+              <button
+                className={`filter-status-btn ${filterStatus === 'active' ? 'active' : ''}`}
+                onClick={() => setFilterStatus('active')}
+              >
+                Active ({activeCount})
+              </button>
+              <button
+                className={`filter-status-btn ${filterStatus === 'upcoming' ? 'active' : ''}`}
+                onClick={() => setFilterStatus('upcoming')}
+              >
+                Upcoming ({upcomingCount})
+              </button>
+              <button
+                className={`filter-status-btn ${filterStatus === 'completed' ? 'active' : ''}`}
+                onClick={() => setFilterStatus('completed')}
+              >
+                Completed ({completedCount})
+              </button>
             </div>
           </div>
 

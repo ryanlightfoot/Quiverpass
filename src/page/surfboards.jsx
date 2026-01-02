@@ -410,10 +410,6 @@ const Surfboards = ({ onRentClick }) => {
                       {board.skillLevel}
                     </span>
                   </div>
-                  <div className="surfboard-detail-item">
-                    <span className="detail-label">School:</span>
-                    <span className="detail-value">{board.school}</span>
-                  </div>
                 </div>
                 <div className="surfboard-footer">
                   <div className="surfboard-price">

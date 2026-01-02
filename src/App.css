@@ -1530,6 +1530,134 @@ img {
   gap: 24px;
 }
 
+/* Board Image Section */
+.rent-board-image-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.board-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #F3F4F6;
+  border: 2px solid #E5E7EB;
+}
+
+.board-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid #165B68;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #165B68;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(22, 91, 104, 0.2);
+}
+
+.image-nav-btn:hover {
+  background: #165B68;
+  color: #F4F0E6;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.image-nav-prev {
+  left: 12px;
+}
+
+.image-nav-next {
+  right: 12px;
+}
+
+.image-counter {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(22, 91, 104, 0.9);
+  color: #F4F0E6;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Oswald', sans-serif;
+  z-index: 10;
+}
+
+.image-thumbnails {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #165B68 #F3F4F6;
+}
+
+.image-thumbnails::-webkit-scrollbar {
+  height: 6px;
+}
+
+.image-thumbnails::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 3px;
+}
+
+.image-thumbnails::-webkit-scrollbar-thumb {
+  background: #165B68;
+  border-radius: 3px;
+}
+
+.thumbnail-btn {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid transparent;
+  background: #F3F4F6;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.thumbnail-btn:hover {
+  border-color: #165B68;
+  transform: scale(1.05);
+}
+
+.thumbnail-btn.active {
+  border-color: #165B68;
+  box-shadow: 0 4px 12px rgba(22, 91, 104, 0.3);
+}
+
+.thumbnail-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .rent-board-header {
   display: flex;
   align-items: flex-start;
@@ -1831,6 +1959,25 @@ img {
   .calendar-day {
     font-size: 0.8rem;
   }
+
+  .board-image-container {
+    aspect-ratio: 16 / 9;
+  }
+
+  .image-nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .image-nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .thumbnail-btn {
+    width: 60px;
+    height: 60px;
+  }
 }
 
 /* --- 13. SURFSCHOOL PAGE STYLES --- */
@@ -1920,6 +2067,12 @@ img {
   letter-spacing: 0.05em;
   font-weight: 600;
   margin-top: 4px;
+}
+
+.surfschool-filters-section {
+  margin-bottom: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #F3F4F6;
 }
 
 .surfschool-filters {
@@ -2327,37 +2480,117 @@ img {
 }
 
 .calendar-tooltip {
-  position: absolute;
+  position: fixed;
   background: #FFFFFF;
   border: 2px solid #165B68;
-  border-radius: 8px;
-  padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(22, 91, 104, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(22, 91, 104, 0.25);
   z-index: 1000;
   pointer-events: none;
-  min-width: 200px;
-  margin-top: 8px;
+  min-width: 280px;
+  max-width: 350px;
+  transform: translate(0, 0);
+  transition: transform 0.15s ease-out, opacity 0.1s ease-out;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #E5E7EB;
+}
+
+.tooltip-day {
+  font-family: 'Oswald', sans-serif;
+  color: #165B68;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.tooltip-count {
+  font-size: 0.75rem;
+  color: #6B7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: #F3F4F6;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.tooltip-rentals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tooltip-rental-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tooltip-rental-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .tooltip-board-name {
   font-family: 'Oswald', sans-serif;
   color: #165B68;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  flex: 1;
+}
+
+.tooltip-status-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.tooltip-status-badge.active {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+}
+
+.tooltip-status-badge.upcoming {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+}
+
+.tooltip-status-badge.completed {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6B7280;
 }
 
 .tooltip-renter {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: #6B7280;
   font-weight: 600;
-  margin-bottom: 4px;
 }
 
 .tooltip-dates {
   font-size: 0.75rem;
   color: #9CA3AF;
+  font-weight: 500;
+}
+
+.tooltip-divider {
+  height: 1px;
+  background: #E5E7EB;
+  margin-top: 8px;
 }
 
 /* Surfschool Page Responsive */

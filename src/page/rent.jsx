@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Calendar, Waves, MapPin, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Waves, MapPin, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import '../App.css';
 
 const Rent = ({ board, onBack }) => {
@@ -7,6 +7,31 @@ const Rent = ({ board, onBack }) => {
   const [endDate, setEndDate] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Placeholder images for surfboards (blank placeholders)
+  const placeholderImages = [
+    'https://via.placeholder.com/800x600/E5E7EB/9CA3AF?text=Surfboard+Image+1',
+    'https://via.placeholder.com/800x600/E5E7EB/9CA3AF?text=Surfboard+Image+2',
+    'https://via.placeholder.com/800x600/E5E7EB/9CA3AF?text=Surfboard+Image+3',
+    'https://via.placeholder.com/800x600/E5E7EB/9CA3AF?text=Surfboard+Image+4'
+  ];
+
+  // Get images for the board (using placeholder for now)
+  const boardImages = placeholderImages;
+
+  // Navigate images
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % boardImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + boardImages.length) % boardImages.length);
+  };
+
+  const goToImage = (index) => {
+    setCurrentImageIndex(index);
+  };
 
   // Get current date for minimum selectable date
   const today = new Date();
@@ -167,6 +192,62 @@ const Rent = ({ board, onBack }) => {
                 </div>
               </div>
 
+              {/* Surfboard Image Carousel */}
+              <div className="rent-board-image-section">
+                <div className="board-image-container">
+                  <img 
+                    src={boardImages[currentImageIndex]} 
+                    alt={`${board.name} - Image ${currentImageIndex + 1}`}
+                    className="board-main-image"
+                    onError={(e) => {
+                      e.target.src = `https://via.placeholder.com/600x400/E5E7EB/9CA3AF?text=${encodeURIComponent(board.name)}`;
+                    }}
+                  />
+                  {boardImages.length > 1 && (
+                    <>
+                      <button 
+                        className="image-nav-btn image-nav-prev"
+                        onClick={prevImage}
+                        aria-label="Previous image"
+                      >
+                        <ChevronLeft size={24} />
+                      </button>
+                      <button 
+                        className="image-nav-btn image-nav-next"
+                        onClick={nextImage}
+                        aria-label="Next image"
+                      >
+                        <ChevronRight size={24} />
+                      </button>
+                      <div className="image-counter">
+                        {currentImageIndex + 1} / {boardImages.length}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {/* Image Thumbnails */}
+                {boardImages.length > 1 && (
+                  <div className="image-thumbnails">
+                    {boardImages.map((image, index) => (
+                      <button
+                        key={index}
+                        className={`thumbnail-btn ${index === currentImageIndex ? 'active' : ''}`}
+                        onClick={() => goToImage(index)}
+                        aria-label={`View image ${index + 1}`}
+                      >
+                        <img 
+                          src={image} 
+                          alt={`Thumbnail ${index + 1}`}
+                          onError={(e) => {
+                            e.target.src = `https://via.placeholder.com/100x100/E5E7EB/9CA3AF?text=${index + 1}`;
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="rent-board-specs">
                 <div className="rent-spec-item">
                   <span className="rent-spec-label">Type:</span>
@@ -181,10 +262,6 @@ const Rent = ({ board, onBack }) => {
                   <span className={`rent-spec-value skill-${board.skillLevel.toLowerCase()}`}>
                     {board.skillLevel}
                   </span>
-                </div>
-                <div className="rent-spec-item">
-                  <span className="rent-spec-label">School:</span>
-                  <span className="rent-spec-value">{board.school}</span>
                 </div>
                 <div className="rent-spec-item">
                   <span className="rent-spec-label">Price:</span>
