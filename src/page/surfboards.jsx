@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { MapPin, Filter, X, Search, Waves, Star, Map } from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../App.css';
@@ -14,9 +14,19 @@ try {
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
   });
 } catch (error) {
-  // Silently handle icon loading errors - custom icons will be used instead
   console.warn('Leaflet default icons could not be loaded, using custom icons');
 }
+
+// Component to handle initial zoom based on markers
+const SetBoundsRect = ({ bounds }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds && bounds.length === 2) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
+  }, [map, bounds]);
+  return null;
+};
 
 const Surfboards = ({ onRentClick }) => {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -99,7 +109,6 @@ const Surfboards = ({ onRentClick }) => {
       school: school.name
     }));
     
-    // Scroll to content section after a short delay to allow state to update
     setTimeout(() => {
       if (contentSectionRef.current) {
         contentSectionRef.current.scrollIntoView({ 
@@ -112,30 +121,25 @@ const Surfboards = ({ onRentClick }) => {
 
   const activeFiltersCount = Object.values(filters).filter(v => v).length + (selectedArea ? 1 : 0);
 
-  // Calculate center of all schools for initial map view
   const centerLat = surfSchools.reduce((sum, s) => sum + s.lat, 0) / surfSchools.length;
   const centerLng = surfSchools.reduce((sum, s) => sum + s.lng, 0) / surfSchools.length;
 
-  // Calculate bounds to restrict map navigation
-  const bounds = useMemo(() => {
+  // Calculate bounds for initial zoom only
+  const initialBounds = useMemo(() => {
     const lats = surfSchools.map(s => s.lat);
     const lngs = surfSchools.map(s => s.lng);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    
-    // Add padding to bounds
-    const latPadding = (maxLat - minLat) * 0.3;
-    const lngPadding = (maxLng - minLng) * 0.3;
-    
     return [
-      [minLat - latPadding, minLng - lngPadding], // Southwest corner
-      [maxLat + latPadding, maxLng + lngPadding]  // Northeast corner
+      [Math.min(...lats) - 5, Math.min(...lngs) - 5], 
+      [Math.max(...lats) + 5, Math.max(...lngs) + 5] 
     ];
   }, []);
 
-  // Create custom icon for markers
+  // Hard limits for the map (One World Only)
+  const maxWorldBounds = [
+    [-90, -180],
+    [90, 180]
+  ];
+
   const createCustomIcon = (isActive) => {
     return L.divIcon({
       className: 'custom-marker',
@@ -163,11 +167,9 @@ const Surfboards = ({ onRentClick }) => {
     });
   };
 
-  // Force map to update when selected area changes
   const [mapKey, setMapKey] = useState(0);
 
   useEffect(() => {
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       setMapKey(prev => prev + 1);
     }, 100);
@@ -176,95 +178,93 @@ const Surfboards = ({ onRentClick }) => {
 
   return (
     <div className="surfboards-page">
-      {/* Map Section */}
       <div className="map-section" id="map-container">
         {typeof window !== 'undefined' && (
           <MapContainer
             key={mapKey}
             center={[centerLat, centerLng]}
             zoom={2}
-            style={{ height: '100%', width: '100%', minHeight: '500px' }}
-            scrollWheelZoom={true}
-            maxBounds={bounds}
-            maxBoundsViscosity={1.0}
-            worldCopyJump={false}
-            whenCreated={(mapInstance) => {
-              // Force map to invalidate size after creation and set bounds
-              setTimeout(() => {
-                mapInstance.invalidateSize();
-                mapInstance.setView([centerLat, centerLng], 2);
-                mapInstance.setMaxBounds(bounds);
-              }, 200);
+            minZoom={2} // Prevents zooming out too far
+            maxBounds={maxWorldBounds} // Restrict to one world
+            maxBoundsViscosity={1.0} // Sticky edges
+            style={{ 
+              height: '100%', 
+              width: '100%', 
+              minHeight: '500px',
+              background: '#aad3df', // Set background color to match water (prevents grey flash)
+              overflow: 'hidden' // Ensures no overflow issues
             }}
+            scrollWheelZoom={true}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maxZoom={19}
-              minZoom={2}
-              noWrap={true}
+              noWrap={true} // IMPORTANT: Stops the world from repeating horizontally
+              bounds={[[-90, -180], [90, 180]]}
             />
-          {surfSchools.map(school => {
-            const isActive = selectedArea?.id === school.id;
-            return (
-              <Marker
-                key={`${school.id}-${isActive}`}
-                position={[school.lat, school.lng]}
-                icon={createCustomIcon(isActive)}
-                eventHandlers={{
-                  click: () => handleAreaClick(school),
-                }}
-              >
-                <Tooltip permanent={false} direction="top" offset={[0, -40]}>
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '6px 10px',
-                    fontFamily: 'Oswald, sans-serif',
-                    fontWeight: '700',
-                    fontSize: '0.9rem',
-                    color: '#165B68',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em'
-                  }}>
-                    {school.city}
-                  </div>
-                </Tooltip>
-                <Popup>
-                  <div style={{ textAlign: 'center', padding: '4px' }}>
-                    <strong style={{ color: '#165B68', fontFamily: 'Oswald, sans-serif' }}>
-                      {school.name}
-                    </strong>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#6B7280' }}>
-                      {school.city}, {school.country}
-                    </p>
-                    <button
-                      onClick={() => handleAreaClick(school)}
-                      style={{
-                        marginTop: '8px',
-                        padding: '6px 12px',
-                        background: '#165B68',
-                        color: '#F4F0E6',
-                        border: 'none',
-                        borderRadius: '6px',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem',
-                        fontWeight: '600',
-                      }}
-                    >
-                      View Boards
-                    </button>
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+            
+            {/* Helper to auto-fit bounds on load */}
+            <SetBoundsRect bounds={initialBounds} />
+
+            {surfSchools.map(school => {
+              const isActive = selectedArea?.id === school.id;
+              return (
+                <Marker
+                  key={`${school.id}-${isActive}`}
+                  position={[school.lat, school.lng]}
+                  icon={createCustomIcon(isActive)}
+                  eventHandlers={{
+                    click: () => handleAreaClick(school),
+                  }}
+                >
+                  <Tooltip permanent={false} direction="top" offset={[0, -40]}>
+                    <div style={{ 
+                      textAlign: 'center', 
+                      padding: '6px 10px',
+                      fontFamily: 'Oswald, sans-serif',
+                      fontWeight: '700',
+                      fontSize: '0.9rem',
+                      color: '#165B68',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      {school.city}
+                    </div>
+                  </Tooltip>
+                  <Popup>
+                    <div style={{ textAlign: 'center', padding: '4px' }}>
+                      <strong style={{ color: '#165B68', fontFamily: 'Oswald, sans-serif' }}>
+                        {school.name}
+                      </strong>
+                      <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: '#6B7280' }}>
+                        {school.city}, {school.country}
+                      </p>
+                      <button
+                        onClick={() => handleAreaClick(school)}
+                        style={{
+                          marginTop: '8px',
+                          padding: '6px 12px',
+                          background: '#165B68',
+                          color: '#F4F0E6',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.85rem',
+                          fontWeight: '600',
+                        }}
+                      >
+                        View Boards
+                      </button>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
         )}
       </div>
 
-      {/* Filters and Content Section */}
       <div className="content-section" ref={contentSectionRef}>
-        {/* Filter Bar */}
         <div className="filter-bar">
           <button
             className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
@@ -289,7 +289,6 @@ const Surfboards = ({ onRentClick }) => {
           </div>
         </div>
 
-        {/* Filter Panel */}
         {showFilters && (
           <div className="filter-panel">
             <div className="filter-group">
@@ -364,7 +363,6 @@ const Surfboards = ({ onRentClick }) => {
           </div>
         )}
 
-        {/* Selected Area Info */}
         {selectedArea && (
           <div className="selected-area-info">
             <MapPin size={20} />
@@ -378,7 +376,6 @@ const Surfboards = ({ onRentClick }) => {
           </div>
         )}
 
-        {/* Surfboards Grid */}
         <div className="surfboards-grid">
           {filteredSurfboards.length > 0 ? (
             filteredSurfboards.map(board => (
@@ -439,4 +436,3 @@ const Surfboards = ({ onRentClick }) => {
 };
 
 export default Surfboards;
-
