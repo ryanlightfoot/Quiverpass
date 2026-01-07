@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { MapPin, Filter, X, Search, Waves, Star, Map } from 'lucide-react';
+import { MapPin, Filter, X, Search, Waves } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../App.css';
 
-// Fix for default marker icons in React - suppress errors if icons fail to load
+// Fix for default marker icons in React
 try {
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -30,6 +30,12 @@ const SetBoundsRect = ({ bounds }) => {
 
 const Surfboards = ({ onRentClick }) => {
   const [selectedArea, setSelectedArea] = useState(null);
+  
+  // State for search bar text and dropdown visibility
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const searchContainerRef = useRef(null);
+
   const [filters, setFilters] = useState({
     city: '',
     school: '',
@@ -69,7 +75,36 @@ const Surfboards = ({ onRentClick }) => {
   const boardTypes = [...new Set(surfboards.map(b => b.type))];
   const skillLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
-  // Filter surfboards
+  // Sync Search Bar with Filters
+  // If the user selects a city via map or normal dropdown, update the search bar text
+  useEffect(() => {
+    if (filters.city) {
+      setSearchQuery(filters.city);
+    } else {
+      setSearchQuery('');
+    }
+  }, [filters.city]);
+
+  // Click outside handler to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setShowCityDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter the LIST of cities shown in the dropdown based on what user is typing
+  const filteredCitySuggestions = useMemo(() => {
+    if (!searchQuery) return cities;
+    return cities.filter(city => 
+      city.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [cities, searchQuery]);
+
+  // Main Surfboard Filter Logic
   const filteredSurfboards = useMemo(() => {
     return surfboards.filter(board => {
       if (filters.city && board.city !== filters.city) return false;
@@ -89,6 +124,23 @@ const Surfboards = ({ onRentClick }) => {
     }));
   };
 
+  const handleCitySelect = (city) => {
+    setFilters(prev => ({ ...prev, city: city }));
+    setSearchQuery(city);
+    setShowCityDropdown(false);
+  };
+
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowCityDropdown(true);
+    
+    // If user clears the input manually, clear the city filter
+    if (value === '') {
+      setFilters(prev => ({ ...prev, city: '' }));
+    }
+  };
+
   const clearFilters = () => {
     setFilters({
       city: '',
@@ -98,6 +150,7 @@ const Surfboards = ({ onRentClick }) => {
       skillLevel: ''
     });
     setSelectedArea(null);
+    setSearchQuery('');
   };
 
   const handleAreaClick = (school) => {
@@ -124,7 +177,6 @@ const Surfboards = ({ onRentClick }) => {
   const centerLat = surfSchools.reduce((sum, s) => sum + s.lat, 0) / surfSchools.length;
   const centerLng = surfSchools.reduce((sum, s) => sum + s.lng, 0) / surfSchools.length;
 
-  // Calculate bounds for initial zoom only
   const initialBounds = useMemo(() => {
     const lats = surfSchools.map(s => s.lat);
     const lngs = surfSchools.map(s => s.lng);
@@ -134,11 +186,7 @@ const Surfboards = ({ onRentClick }) => {
     ];
   }, []);
 
-  // Hard limits for the map (One World Only)
-  const maxWorldBounds = [
-    [-90, -180],
-    [90, 180]
-  ];
+  const maxWorldBounds = [[-90, -180], [90, 180]];
 
   const createCustomIcon = (isActive) => {
     return L.divIcon({
@@ -184,26 +232,24 @@ const Surfboards = ({ onRentClick }) => {
             key={mapKey}
             center={[centerLat, centerLng]}
             zoom={2}
-            minZoom={2} // Prevents zooming out too far
-            maxBounds={maxWorldBounds} // Restrict to one world
-            maxBoundsViscosity={1.0} // Sticky edges
+            minZoom={2}
+            maxBounds={maxWorldBounds}
+            maxBoundsViscosity={1.0}
             style={{ 
               height: '100%', 
               width: '100%', 
               minHeight: '500px',
-              background: '#aad3df', // Set background color to match water (prevents grey flash)
-              overflow: 'hidden' // Ensures no overflow issues
+              background: '#aad3df',
+              overflow: 'hidden'
             }}
             scrollWheelZoom={true}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              noWrap={true} // IMPORTANT: Stops the world from repeating horizontally
+              noWrap={true}
               bounds={[[-90, -180], [90, 180]]}
             />
-            
-            {/* Helper to auto-fit bounds on load */}
             <SetBoundsRect bounds={initialBounds} />
 
             {surfSchools.map(school => {
@@ -276,6 +322,118 @@ const Surfboards = ({ onRentClick }) => {
               <span className="filter-badge">{activeFiltersCount}</span>
             )}
           </button>
+
+          {/* AUTOCOMPLETE SEARCH BAR */}
+          <div 
+            ref={searchContainerRef}
+            style={{
+              position: 'relative',
+              marginLeft: '12px',
+              flex: 1,
+              maxWidth: '300px'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '8px',
+              border: '1px solid #E5E7EB',
+              padding: '8px 12px',
+            }}>
+              <Search size={18} color="#9CA3AF" />
+              <input
+                type="text"
+                placeholder="Search city"
+                value={searchQuery}
+                onChange={handleSearchInputChange}
+                onFocus={() => setShowCityDropdown(true)}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  marginLeft: '8px',
+                  width: '100%',
+                  fontSize: '0.95rem',
+                  color: '#374151'
+                }}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setFilters(prev => ({...prev, city: ''}));
+                  }}
+                  style={{
+                    background: 'none', 
+                    border: 'none', 
+                    cursor: 'pointer',
+                    padding: '0',
+                    display: 'flex'
+                  }}
+                >
+                  <X size={14} color="#9CA3AF" />
+                </button>
+              )}
+            </div>
+
+            {/* DROPDOWN MENU */}
+            {showCityDropdown && filteredCitySuggestions.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: '4px',
+                background: 'white',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                border: '1px solid #E5E7EB',
+                zIndex: 50,
+                maxHeight: '200px',
+                overflowY: 'auto'
+              }}>
+                {filteredCitySuggestions.map((city) => (
+                  <div
+                    key={city}
+                    onClick={() => handleCitySelect(city)}
+                    style={{
+                      padding: '8px 12px',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid #F3F4F6',
+                      fontSize: '0.95rem',
+                      color: '#374151',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#F9FAFB'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                  >
+                    {city}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {showCityDropdown && searchQuery && filteredCitySuggestions.length === 0 && (
+               <div style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                marginTop: '4px',
+                background: 'white',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #E5E7EB',
+                zIndex: 50,
+                fontSize: '0.9rem',
+                color: '#6B7280'
+              }}>
+                No cities found
+              </div>
+            )}
+          </div>
+          {/* END SEARCH BAR */}
 
           {activeFiltersCount > 0 && (
             <button className="clear-filters-btn" onClick={clearFilters}>
@@ -426,7 +584,7 @@ const Surfboards = ({ onRentClick }) => {
             <div className="no-results">
               <Waves size={48} color="#9CA3AF" />
               <h3>No surfboards found</h3>
-              <p>Try adjusting your filters or select a different area on the map</p>
+              <p>Try adjusting your filters or search criteria</p>
             </div>
           )}
         </div>
